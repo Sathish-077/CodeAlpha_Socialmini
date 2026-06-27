@@ -1,0 +1,107 @@
+{% extends 'core/base.html' %}
+{% block title %}Home — SocialMini{% endblock %}
+{% block content %}
+<div class="feed-layout">
+
+  <div class="feed-main">
+
+    <div class="card composer">
+      <div class="composer-avatar">
+        <span style="background:{{ user.profile.avatar_color|default:'#6366f1' }}">{{ user.username|first|upper }}</span>
+      </div>
+      <form method="post" action="{% url 'create_post' %}" class="composer-form" enctype="multipart/form-data">
+        {% csrf_token %}
+        <textarea name="content" placeholder="What's on your mind?" maxlength="500" rows="2"></textarea>
+        <div id="image-preview-wrap" style="display:none">
+          <img id="image-preview" src="" alt="preview" />
+          <button type="button" id="remove-image">✕</button>
+        </div>
+        <div class="composer-footer">
+          <label class="btn btn-outline btn-sm image-upload-label">
+            🖼 Photo
+            <input type="file" name="image" id="image-input" accept="image/*" style="display:none" />
+          </label>
+          <span class="char-counter"><span id="cc">0</span>/500</span>
+          <button type="submit" class="btn btn-primary">Post</button>
+        </div>
+      </form>
+    </div>
+
+    {% if posts %}
+      {% for post in posts %}
+        {% include 'core/_post_card.html' with post=post %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">✦</div>
+        <h3>Your feed is quiet</h3>
+        <p>Follow some people to see their posts here, or share something yourself.</p>
+        <a href="{% url 'explore' %}" class="btn btn-outline">Explore posts</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <aside class="feed-sidebar">
+    <div class="card sidebar-profile">
+      <a href="{% url 'profile' username=user.username %}" class="sidebar-user">
+        <div class="avatar-lg" style="background:{{ user.profile.avatar_color|default:'#6366f1' }}">{{ user.username|first|upper }}</div>
+        <div>
+          <strong>{{ user.get_full_name|default:user.username }}</strong>
+          <span class="muted">@{{ user.username }}</span>
+        </div>
+      </a>
+      <div class="profile-mini-stats">
+        <a href="{% url 'profile' username=user.username %}">
+          <strong>{{ user.posts.count }}</strong> <span>Posts</span>
+        </a>
+        <a href="{% url 'profile' username=user.username %}">
+          <strong>{{ user.followers.count }}</strong> <span>Followers</span>
+        </a>
+        <a href="{% url 'profile' username=user.username %}">
+          <strong>{{ user.following.count }}</strong> <span>Following</span>
+        </a>
+      </div>
+    </div>
+
+    {% if suggested %}
+    <div class="card">
+      <h4 class="sidebar-heading">People to follow</h4>
+      {% for su in suggested %}
+      <div class="suggestion-row">
+        <a href="{% url 'profile' username=su.username %}" class="suggestion-user">
+          {% with su.profile.avatar_color as color %}
+          <div class="avatar-sm" style="background:{{ color|default:'#6366f1' }}">{{ su.username|first|upper }}</div>
+          {% endwith %}
+          <div>
+            <strong>{{ su.get_full_name|default:su.username }}</strong>
+            <span class="muted">@{{ su.username }}</span>
+          </div>
+        </a>
+        <button class="btn btn-outline btn-sm follow-btn"
+                data-username="{{ su.username }}"
+                data-following="false">Follow</button>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </aside>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const ta = document.querySelector('.composer-form textarea');
+const cc = document.getElementById('cc');
+if (ta) ta.addEventListener('input', () => cc.textContent = ta.value.length);
+
+const likedIds = new Set([{% for pid in liked_post_ids %}{{ pid }},{% endfor %}]);
+document.querySelectorAll('.like-btn').forEach(btn => {
+  const pid = parseInt(btn.dataset.postId);
+  if (likedIds.has(pid)) {
+    btn.classList.add('liked');
+    btn.querySelector('.like-icon').textContent = '♥';
+  }
+});
+</script>
+{% endblock %}

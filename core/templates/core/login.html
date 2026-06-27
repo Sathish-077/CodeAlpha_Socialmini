@@ -1,0 +1,25 @@
+{% extends 'core/base.html' %}
+{% block title %}Sign In — SocialMini{% endblock %}
+{% block content %}
+<div class="auth-card">
+  <div class="auth-brand">
+    <span class="brand-mark">✦</span>
+    <h1>SocialMini</h1>
+    <p>Your space to share and connect.</p>
+  </div>
+  <form method="post" class="auth-form">
+    {% csrf_token %}
+    {% if error %}<div class="form-error">{{ error }}</div>{% endif %}
+    <div class="form-group">
+      <label>Username</label>
+      <input type="text" name="username" autofocus required />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" name="password" required />
+    </div>
+    <button type="submit" class="btn btn-primary btn-full">Sign in</button>
+  </form>
+  <p class="auth-switch">New here? <a href="{% url 'register' %}">Create account</a></p>
+</div>
+{% endblock %}

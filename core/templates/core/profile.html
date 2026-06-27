@@ -1,0 +1,131 @@
+{% extends 'core/base.html' %}
+{% block title %}@{{ profile_user.username }} — SocialMini{% endblock %}
+{% block content %}
+<div class="profile-layout">
+
+  <!-- Profile Header -->
+  <div class="card profile-header">
+    <div class="profile-cover" style="background: linear-gradient(135deg, {{ profile.avatar_color|default:'#6366f1' }}33, {{ profile.avatar_color|default:'#6366f1' }}11);"></div>
+    <div class="profile-header-body">
+      <div class="profile-avatar-wrap">
+        <div class="avatar-xl" style="background:{{ profile.avatar_color|default:'#6366f1' }}">
+          {{ profile_user.username|first|upper }}
+        </div>
+      </div>
+      <div class="profile-info">
+        <div class="profile-name-row">
+          <div>
+            <h2>{{ profile_user.get_full_name|default:profile_user.username }}</h2>
+            <span class="muted">@{{ profile_user.username }}</span>
+          </div>
+          <div class="profile-actions">
+            {% if profile_user == request.user %}
+              <a href="{% url 'edit_profile' %}" class="btn btn-outline">Edit profile</a>
+            {% else %}
+              <button class="btn follow-btn {% if is_following %}btn-following{% else %}btn-primary{% endif %}"
+                      data-username="{{ profile_user.username }}"
+                      data-following="{{ is_following|lower }}">
+                {% if is_following %}Following{% else %}Follow{% endif %}
+              </button>
+            {% endif %}
+          </div>
+        </div>
+        {% if profile.bio %}<p class="profile-bio">{{ profile.bio }}</p>{% endif %}
+        {% if profile.website %}
+          <a href="{{ profile.website }}" target="_blank" class="profile-link">🔗 {{ profile.website }}</a>
+        {% endif %}
+        <div class="profile-stats">
+          <div><strong>{{ profile.get_posts_count }}</strong> <span>Posts</span></div>
+          <div id="followers-count"><strong>{{ profile.get_followers_count }}</strong> <span>Followers</span></div>
+          <div><strong>{{ profile.get_following_count }}</strong> <span>Following</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="profile-tabs">
+    <button class="tab-btn active" data-tab="posts">Posts</button>
+    <button class="tab-btn" data-tab="followers">Followers</button>
+    <button class="tab-btn" data-tab="following">Following</button>
+  </div>
+
+  <!-- Posts Tab -->
+  <div class="tab-content active" id="tab-posts">
+    {% if posts %}
+      {% for post in posts %}
+        {% include 'core/_post_card.html' %}
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">✦</div>
+        <h3>No posts yet</h3>
+        {% if profile_user == request.user %}<p>Share your first thought.</p>{% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Followers Tab -->
+  <div class="tab-content" id="tab-followers" style="display:none">
+    {% if followers %}
+      {% for follow in followers %}
+      <div class="card user-row">
+        <a href="{% url 'profile' username=follow.follower.username %}" class="user-row-info">
+          <div class="avatar-sm" style="background:{{ follow.follower.profile.avatar_color|default:'#6366f1' }}">{{ follow.follower.username|first|upper }}</div>
+          <div>
+            <strong>{{ follow.follower.get_full_name|default:follow.follower.username }}</strong>
+            <span class="muted">@{{ follow.follower.username }}</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state"><p>No followers yet.</p></div>
+    {% endif %}
+  </div>
+
+  <!-- Following Tab -->
+  <div class="tab-content" id="tab-following" style="display:none">
+    {% if following_list %}
+      {% for follow in following_list %}
+      <div class="card user-row">
+        <a href="{% url 'profile' username=follow.following.username %}" class="user-row-info">
+          <div class="avatar-sm" style="background:{{ follow.following.profile.avatar_color|default:'#6366f1' }}">{{ follow.following.username|first|upper }}</div>
+          <div>
+            <strong>{{ follow.following.get_full_name|default:follow.following.username }}</strong>
+            <span class="muted">@{{ follow.following.username }}</span>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state"><p>Not following anyone yet.</p></div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).style.display = '';
+  });
+});
+
+// Like initial state
+const likedIds = new Set([{% for pid in liked_post_ids %}{{ pid }},{% endfor %}]);
+document.querySelectorAll('.like-btn').forEach(btn => {
+  const pid = parseInt(btn.dataset.postId);
+  if (likedIds.has(pid)) {
+    btn.classList.add('liked');
+    btn.querySelector('.like-icon').textContent = '♥';
+  }
+});
+</script>
+{% endblock %}

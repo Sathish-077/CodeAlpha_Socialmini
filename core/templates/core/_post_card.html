@@ -1,0 +1,70 @@
+{% load static %}
+<article class="card post-card" id="post-{{ post.id }}">
+  <div class="post-header">
+    <a href="{% url 'profile' username=post.author.username %}" class="post-author">
+      <div class="avatar-sm" style="background:{{ post.author.profile.avatar_color|default:'#6366f1' }}">
+        {{ post.author.username|first|upper }}
+      </div>
+      <div>
+        <strong>{{ post.author.get_full_name|default:post.author.username }}</strong>
+        <span class="muted">@{{ post.author.username }} · {{ post.created_at|timesince }} ago</span>
+      </div>
+    </a>
+    {% if post.author == request.user %}
+    <form method="post" action="{% url 'delete_post' post_id=post.id %}" class="delete-form">
+      {% csrf_token %}
+      <button type="submit" class="btn-ghost btn-sm delete-post-btn" title="Delete post">✕</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="post-body">
+    <p>{{ post.content|linebreaksbr }}</p>
+  </div>
+  {% if post.image %}
+<div class="post-image">
+  <img src="{{ post.image.url }}" alt="Post image" class="img-fluid rounded mt-2">
+</div>
+{% endif %}
+
+  <div class="post-actions">
+    <button class="like-btn action-btn {% if post.id in liked_post_ids %}liked{% endif %}"
+            data-post-id="{{ post.id }}"
+            data-csrf="{{ csrf_token }}">
+      <span class="like-icon">{% if post.id in liked_post_ids %}♥{% else %}♡{% endif %}</span>
+      <span class="like-count">{{ post.likes.count }}</span>
+    </button>
+
+    <a href="{% url 'post_detail' post_id=post.id %}" class="action-btn comment-toggle">
+      <span>💬</span>
+      <span class="comment-count-{{ post.id }}">{{ post.comments.count }}</span>
+    </a>
+  </div>
+
+  <!-- Inline comment box -->
+  <div class="comment-box" id="comments-{{ post.id }}">
+    <div class="comment-input-row">
+      <div class="avatar-xs" style="background:{{ request.user.profile.avatar_color|default:'#6366f1' }}">{{ request.user.username|first|upper }}</div>
+      <input type="text" class="comment-input" placeholder="Add a comment…"
+             data-post-id="{{ post.id }}" data-csrf="{{ csrf_token }}" maxlength="300" />
+      <button class="btn btn-sm btn-primary comment-submit" data-post-id="{{ post.id }}">Post</button>
+    </div>
+    <div class="comments-list" id="comment-list-{{ post.id }}">
+      {% for comment in post.comments.all|slice:":3" %}
+      <div class="comment-item" id="comment-{{ comment.id }}">
+        <div class="avatar-xs" style="background:{{ comment.author.profile.avatar_color|default:'#6366f1' }}">{{ comment.author.username|first|upper }}</div>
+        <div class="comment-body">
+          <a href="{% url 'profile' username=comment.author.username %}"><strong>{{ comment.author.username }}</strong></a>
+          <span>{{ comment.content }}</span>
+        </div>
+        {% if comment.author == request.user %}
+        <button class="btn-ghost delete-comment-btn" data-comment-id="{{ comment.id }}" data-csrf="{{ csrf_token }}">✕</button>
+        {% endif %}
+      </div>
+      {% endfor %}
+      {% if post.comments.count > 3 %}
+      <a href="{% url 'post_detail' post_id=post.id %}" class="view-all-comments">View all {{ post.comments.count }} comments</a>
+      {% endif %}
+    </div>
+  </div>
+</article>

@@ -1,0 +1,59 @@
+{% extends 'core/base.html' %}
+{% block title %}Search{% if q %}: {{ q }}{% endif %} — SocialMini{% endblock %}
+{% block content %}
+<div class="narrow-layout">
+  <div class="card">
+    <form action="{% url 'search' %}" method="get" class="search-bar-large">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search people and posts…" autofocus />
+      <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+  </div>
+
+  {% if q %}
+    {% if users %}
+    <h3 class="section-heading">People</h3>
+    {% for u in users %}
+    <div class="card user-row">
+      <a href="{% url 'profile' username=u.username %}" class="user-row-info">
+        <div class="avatar-sm" style="background:{{ u.profile.avatar_color|default:'#6366f1' }}">{{ u.username|first|upper }}</div>
+        <div>
+          <strong>{{ u.get_full_name|default:u.username }}</strong>
+          <span class="muted">@{{ u.username }}</span>
+        </div>
+      </a>
+      <button class="btn btn-sm {% if u.id in following_ids %}btn-following{% else %}btn-outline{% endif %} follow-btn"
+              data-username="{{ u.username }}"
+              data-following="{% if u.id in following_ids %}true{% else %}false{% endif %}">
+        {% if u.id in following_ids %}Following{% else %}Follow{% endif %}
+      </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if posts %}
+    <h3 class="section-heading">Posts</h3>
+    {% for post in posts %}
+      {% include 'core/_post_card.html' %}
+    {% endfor %}
+    {% endif %}
+
+    {% if not users and not posts %}
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>No results for "{{ q }}"</h3>
+      <p>Try different keywords or check the spelling.</p>
+    </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const likedIds = new Set([{% for pid in liked_post_ids %}{{ pid }},{% endfor %}]);
+document.querySelectorAll('.like-btn').forEach(btn => {
+  const pid = parseInt(btn.dataset.postId);
+  if (likedIds.has(pid)) { btn.classList.add('liked'); btn.querySelector('.like-icon').textContent = '♥'; }
+});
+</script>
+{% endblock %}
