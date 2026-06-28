@@ -4,14 +4,20 @@
 <div class="narrow-layout">
   <div class="card">
     <h2 class="card-title">Edit Profile</h2>
-    <form method="post" class="edit-form">
+    <form method="post" class="edit-form" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="avatar-preview-row">
-        <div class="avatar-xl" id="avatar-preview" style="background:{{ profile.avatar_color|default:'#6366f1' }}">{{ request.user.username|first|upper }}</div>
+        {% if profile.avatar %}
+          <img src="{{ profile.avatar.url }}" id="avatar-preview" class="avatar-xl" style="object-fit:cover;" />
+        {% else %}
+          <div class="avatar-xl" id="avatar-preview" style="background:{{ profile.avatar_color|default:'#6366f1' }}">{{ request.user.username|first|upper }}</div>
+        {% endif %}
         <div>
-          <label>Avatar color</label>
+          <label>Profile Photo</label>
+          <input type="file" name="avatar" accept="image/*" style="color:var(--text);margin-top:6px;" />
+          <label style="margin-top:10px;display:block;">Avatar color</label>
           {{ form.avatar_color }}
-        </div>
+       </div>
       </div>
       <div class="form-row">
         <div class="form-group">
