@@ -6,6 +6,12 @@
   <title>{% block title %}SocialMini{% endblock %}</title>
   {% load static %}
   <link rel="stylesheet" href="{% static 'core/css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'core/css/main.css' %}" />
+  <link rel="manifest" href="{% static 'core/manifest.json' %}" />
+  <meta name="theme-color" content="#6366f1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SocialMini" />
 </head>
 <body>
   {% if user.is_authenticated %}
@@ -51,5 +57,12 @@
 
   <script src="{% static 'core/js/app.js' %}"></script>
   {% block extra_js %}{% endblock %}
+  <script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/static/core/sw.js')
+      .then(() => console.log('SW registered'))
+      .catch(err => console.log('SW error:', err));
+  }
+</script>
 </body>
 </html>
