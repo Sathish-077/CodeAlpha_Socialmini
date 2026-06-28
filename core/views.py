@@ -209,7 +209,7 @@ def profile_view(request, username):
 def edit_profile(request):
     profile = get_or_create_profile(request.user)
     if request.method == 'POST':
-        form = ProfileEditForm(request.POST, instance=profile)
+        form = ProfileEditForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             # Update user fields
             request.user.first_name = request.POST.get('first_name', '')

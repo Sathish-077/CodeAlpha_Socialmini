@@ -8,9 +8,13 @@
     <div class="profile-cover" style="background: linear-gradient(135deg, {{ profile.avatar_color|default:'#6366f1' }}33, {{ profile.avatar_color|default:'#6366f1' }}11);"></div>
     <div class="profile-header-body">
       <div class="profile-avatar-wrap">
-        <div class="avatar-xl" style="background:{{ profile.avatar_color|default:'#6366f1' }}">
-          {{ profile_user.username|first|upper }}
-        </div>
+        {% if profile.avatar %}
+           <img src="{{ profile.avatar.url }}" class="avatar-xl" style="object-fit:cover;" />
+        {% else %}
+           <div class="avatar-xl" style="background:{{ profile.avatar_color|default:'#6366f1' }}">
+             {{ profile_user.username|first|upper }}
+           </div>
+        {% endif %}
       </div>
       <div class="profile-info">
         <div class="profile-name-row">

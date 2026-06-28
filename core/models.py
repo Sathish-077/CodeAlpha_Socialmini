@@ -6,7 +6,8 @@ from django.utils import timezone
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     bio = models.TextField(blank=True, max_length=300)
-    avatar_color = models.CharField(max_length=7, default='#6366f1')  # hex color for avatar
+    avatar_color = models.CharField(max_length=7, default='#6366f1')  # hex color for avatar 
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     website = models.URLField(blank=True)
     created_at = models.DateTimeField(default=timezone.now)
 

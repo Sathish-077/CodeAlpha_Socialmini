@@ -59,7 +59,7 @@ class ProfileEditForm(forms.ModelForm):
 
     class Meta:
         model = Profile
-        fields = ('bio', 'avatar_color', 'website')
+        fields = ('bio', 'avatar_color', 'avatar', 'website')
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 3, 'maxlength': 300, 'placeholder': 'Tell people about yourself...'}),
             'avatar_color': forms.TextInput(attrs={'type': 'color'}),
